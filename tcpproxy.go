@@ -135,11 +135,6 @@ func (p *Proxy) addRoute(ipPort string, r route) {
 	cfg.routes = append(cfg.routes, r)
 }
 
-func (p *Proxy) AddMatchRoute(ipPort string, r route) {
-	cfg := p.configFor(ipPort)
-	cfg.routes = append(cfg.routes, r)
-}
-
 // AddRoute appends an always-matching route to the ipPort listener,
 // directing any connection to dest.
 //
