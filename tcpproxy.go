@@ -93,13 +93,13 @@ func equals(want string) Matcher {
 
 // config contains the proxying state for one listener.
 type config struct {
-	routes      []Route
+	routes      []route
 	acmeTargets []Target // accumulates targets that should be probed for acme.
 	stopACME    bool     // if true, AddSNIRoute doesn't add targets to acmeTargets.
 }
 
 // A route matches a connection to a target.
-type Route interface {
+type route interface {
 	// match examines the initial bytes of a connection, looking for a
 	// match. If a match is found, match returns a non-nil Target to
 	// which the stream should be proxied. match returns nil if the
@@ -130,12 +130,12 @@ func (p *Proxy) configFor(ipPort string) *config {
 	return p.configs[ipPort]
 }
 
-func (p *Proxy) addRoute(ipPort string, r Route) {
+func (p *Proxy) addRoute(ipPort string, r route) {
 	cfg := p.configFor(ipPort)
 	cfg.routes = append(cfg.routes, r)
 }
 
-func (p *Proxy) AddMatchRoute(ipPort string, r Route) {
+func (p *Proxy) AddMatchRoute(ipPort string, r route) {
 	cfg := p.configFor(ipPort)
 	cfg.routes = append(cfg.routes, r)
 }
@@ -216,7 +216,7 @@ func (p *Proxy) awaitFirstError(errc <-chan error) {
 	close(p.donec)
 }
 
-func (p *Proxy) serveListener(ret chan<- error, ln net.Listener, routes []Route) {
+func (p *Proxy) serveListener(ret chan<- error, ln net.Listener, routes []route) {
 	for {
 		c, err := ln.Accept()
 		if err != nil {
@@ -229,7 +229,7 @@ func (p *Proxy) serveListener(ret chan<- error, ln net.Listener, routes []Route)
 
 // serveConn runs in its own goroutine and matches c against routes.
 // It returns whether it matched purely for testing.
-func (p *Proxy) serveConn(c net.Conn, routes []Route) bool {
+func (p *Proxy) serveConn(c net.Conn, routes []route) bool {
 	br := bufio.NewReader(c)
 	for _, route := range routes {
 		if target, hostName := route.match(br); target != nil {
